@@ -2,7 +2,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Healthcare & Wellness Chatbot</title>
+  <title>Financial Assistant of a Bank</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -28,7 +28,7 @@
     }
 
     .chat-header {
-      background: #00796b;
+      background: #075e54;
       color: white;
       padding: 15px;
       text-align: center;
@@ -40,31 +40,29 @@
       padding: 15px;
       overflow-y: auto;
       font-size: 15px;
+      background-color: #dcf8c6;
     }
 
     .message {
       margin: 10px 0;
       padding: 8px 12px;
-      border-radius: 15px;
+      border-radius: 20px;
       display: inline-block;
       max-width: 80%;
       word-wrap: break-word;
+      clear: both;
     }
 
     .user {
-      background: #00796b;
-      color: white;
-      align-self: flex-end;
+      background: #dcf8c6;
+      color: black;
       float: right;
-      clear: both;
     }
 
     .bot {
-      background: #f1f1f1;
-      color: #333;
-      align-self: flex-start;
+      background: #ffffff;
+      color: black;
       float: left;
-      clear: both;
     }
 
     .chat-input {
@@ -82,7 +80,7 @@
     }
 
     .chat-input button {
-      background: #00796b;
+      background: #25d366;
       border: none;
       color: white;
       padding: 10px 15px;
@@ -121,35 +119,59 @@
 </head>
 <body>
   <div class="chat-container">
-    <div class="chat-header">Healthcare & Wellness Bot</div>
+    <div class="chat-header">💰 Financial Assistant of a Bank</div>
     <div class="chat-box" id="chatBox">
-      <div class="message bot">Hello! I’m your health assistant. How can I help you today?</div>
+      <div class="message bot">Hello! नमस्कार! I am your financial assistant. Ask me anything related to banking!</div>
     </div>
 
-    <!-- Quick Buttons -->
     <div class="quick-buttons">
-      <button onclick="quickQuestion('timing')">Timings</button>
-      <button onclick="quickQuestion('appointment')">Appointment</button>
-      <button onclick="quickQuestion('location')">Location</button>
-      <button onclick="quickQuestion('diet')">Diet Tips</button>
-      <button onclick="quickQuestion('stress')">Stress Help</button>
-      <button onclick="quickQuestion('vaccination')">Vaccines</button>
+      <button onclick="quickQuestion('Balance')">Balance</button>
+      <button onclick="quickQuestion('Loan')">Loan</button>
+      <button onclick="quickQuestion('Credit Card')">Credit Card</button>
+      <button onclick="quickQuestion('EMI')">EMI</button>
+      <button onclick="quickQuestion('FD')">FD</button>
+      <button onclick="quickQuestion('UPI')">UPI</button>
+      <button onclick="quickQuestion('KYC')">KYC</button>
     </div>
 
-    <!-- Input with Voice -->
     <div class="chat-input">
-      <input type="text" id="userInput" placeholder="Type or use voice..."/>
+      <input type="text" id="userInput" placeholder="Type or speak..."/>
       <button onclick="sendMessage()">Send</button>
       <button onclick="startVoice()">🎤</button>
     </div>
   </div>
 
   <script>
+    const faqResponses = {
+      "balance": "Check your balance via app, SMS, or ATM. | आप बैलेंस SMS या एटीएम से चेक कर सकते हैं | शिल्लक ATM किंवा SMS ने तपासा",
+      "loan": "We offer various loan options. Visit the branch for more. | हम विभिन्न प्रकार के लोन देते हैं | कर्जासाठी शाखेत भेट द्या",
+      "credit card": "Apply online or visit branch. | क्रेडिट कार्ड के लिए ऑनलाइन या शाखा में आवेदन करें | क्रेडिट कार्डसाठी ऑनलाईन अर्ज करा",
+      "emi": "Use our EMI calculator online. | EMI की गणना ऑनलाइन करें | EMI कॅल्क्युलेटर वापरा",
+      "fd": "Start FD with ₹1000. | ₹1000 से FD शुरू करें | ₹1000 पासून FD सुरू करा",
+      "upi": "UPI से तुरंत पैसे भेजें | Instantly transfer using UPI | UPI ने त्वरित पैसे पाठवा",
+      "kyc": "Update KYC online or in branch. | KYC ऑनलाइन या शाखा में अपडेट करें | KYC ऑनलाईन किंवा शाखेत अपडेट करा",
+      "net banking": "Register online or in branch. | नेट बैंकिंग के लिए रजिस्टर करें | नेट बँकिंगसाठी नोंदणी करा",
+      "open account": "Open account with PAN and Aadhaar. | पैन और आधार से खाता खोलें | पॅन व आधारने खाते उघडा",
+      "debit card": "Apply for debit card online. | डेबिट कार्ड के लिए ऑनलाइन आवेदन करें | डेबिट कार्डसाठी ऑनलाईन अर्ज करा",
+      "statement": "Download e-statement from net banking. | नेट बैंकिंग से स्टेटमेंट डाउनलोड करें | नेट बँकिंगमधून स्टेटमेंट डाउनलोड करा",
+      "ifsc": "Find IFSC code on our website. | IFSC कोड हमारी वेबसाइट पर देखें | आमच्या वेबसाइटवर IFSC कोड पाहा",
+      "aadhar link": "Link Aadhaar to your bank online. | बैंक में आधार लिंक करें | बँकेत आधार लिंक करा",
+      "pan update": "Submit PAN card copy at branch. | पैन कार्ड शाखा में जमा करें | शाखेत पॅन सादर करा",
+      "mobile update": "Update mobile via net banking. | नेट बैंकिंग से मोबाइल नंबर अपडेट करें | नेट बँकिंगने मोबाईल अपडेट करा",
+      "rd": "Recurring Deposit starts from ₹500. | ₹500 से RD शुरू करें | ₹500 पासून RD सुरू करा",
+      "overdraft": "Overdraft is available with current account. | चालू खाते में ओवरड्राफ्ट सुविधा उपलब्ध है | चालू खात्याला ओवरड्राफ्ट उपलब्ध आहे",
+      "cheque": "Request cheque book online. | चेक बुक ऑनलाइन मांगे | ऑनलाईन चेकबुक मागवा",
+      "mini statement": "Send ‘MINI’ to 9223XXXXXX. | 9223XXXXXX पर 'MINI' भेजें | 'MINI' 9223XXXXXX वर पाठवा",
+      "block card": "Block card via app or call 1800-XXX. | कार्ड को ऐप से ब्लॉक करें | अॅपद्वारे कार्ड ब्लॉक करा",
+      "interest rate": "Interest rates vary. Check latest online. | ब्याज दरें बदलती रहती हैं | व्याजदर ऑनलाईन तपासा",
+      "account close": "Visit branch to close your account. | खाता बंद करने शाखा जाएं | खाते बंद करण्यासाठी शाखा भेट द्या"
+    };
+
     function sendMessage() {
       const input = document.getElementById("userInput");
       const chatBox = document.getElementById("chatBox");
       const userText = input.value.trim();
-      if (userText === "") return;
+      if (!userText) return;
 
       const userMsg = document.createElement("div");
       userMsg.className = "message user";
@@ -172,11 +194,11 @@
 
     function startVoice() {
       if (!('webkitSpeechRecognition' in window)) {
-        alert("Voice input not supported in this browser.");
+        alert("Voice input not supported.");
         return;
       }
       const recognition = new webkitSpeechRecognition();
-      recognition.lang = 'en-IN';
+      recognition.lang = 'hi-IN'; // Supports Hindi & Marathi
       recognition.start();
       recognition.onresult = function(event) {
         document.getElementById("userInput").value = event.results[0][0].transcript;
@@ -186,29 +208,10 @@
 
     function getBotResponse(msg) {
       msg = msg.toLowerCase();
-
-      if (msg.includes("hello") || msg.includes("hi") || msg.includes("नमस्कार")) {
-        return "Hello! / नमस्कार! How can I assist you today? / मी तुम्हाला कशी मदत करू शकतो?";
-      } 
-      if (msg.includes("timing") || msg.includes("hours") || msg.includes("वेळ")) {
-        return "We are open from 9 AM to 7 PM, Mon-Sat. / आम्ही सकाळी ९ ते संध्याकाळी ७ पर्यंत खुले असतो, सोमवार ते शनिवार.";
+      for (const key in faqResponses) {
+        if (msg.includes(key)) return faqResponses[key];
       }
-      if (msg.includes("location") || msg.includes("कुठे")) {
-        return "We’re located at 123 Health Street, Wellness City. / आम्ही 123 हेल्थ स्ट्रीट, वेलनेस सिटी येथे आहोत.";
-      }
-      if (msg.includes("appointment") || msg.includes("अपॉइंटमेंट")) {
-        return "You can book an appointment by phone or website. / तुम्ही फोन करून किंवा वेबसाइटवरून अपॉइंटमेंट बुक करू शकता.";
-      }
-      if (msg.includes("diet") || msg.includes("आहार")) {
-        return "A balanced diet is key to health. / संतुलित आहार हा आरोग्याचा पाया आहे.";
-      }
-      if (msg.includes("stress") || msg.includes("तणाव")) {
-        return "Practice deep breathing & relaxation. / खोल श्वास घ्या आणि विश्रांती घ्या.";
-      }
-      if (msg.includes("vaccination") || msg.includes("लस")) {
-        return "Yes, vaccines are available. / होय, लसी उपलब्ध आहेत.";
-      }
-      return "I'm here for health, appointments, and wellness tips. Please ask again. / मी आरोग्य आणि सल्ल्यासाठी येथे आहे. पुन्हा विचारा.";
+      return "Sorry, I didn’t get that. कृपया बँक संबंधित प्रश्न विचारा | Please ask a banking-related question.";
     }
   </script>
 </body>
