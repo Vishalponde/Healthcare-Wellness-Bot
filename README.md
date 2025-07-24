@@ -2,7 +2,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Financial Assistant of a Bank</title>
+  <title>Bank Assistant with EMI & Interest Calculator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -10,21 +10,20 @@
       margin: 0;
       padding: 0;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
     }
 
     .chat-container {
       width: 95%;
       max-width: 400px;
-      height: 90vh;
       background: #ffffff;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
       border-radius: 10px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      margin-top: 10px;
     }
 
     .chat-header {
@@ -36,7 +35,7 @@
     }
 
     .chat-box {
-      flex: 1;
+      height: 50vh;
       padding: 15px;
       overflow-y: auto;
       font-size: 15px;
@@ -110,14 +109,42 @@
       white-space: nowrap;
     }
 
+    .calculator {
+      width: 95%;
+      max-width: 400px;
+      background: #ffffff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      border-radius: 10px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+
+    .calculator input, .calculator select, .calculator button {
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      font-size: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .calculator button {
+      background-color: #00796b;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+
     @media (max-width: 600px) {
-      .chat-container {
-        height: 95vh;
+      .chat-box {
+        height: 45vh;
       }
     }
   </style>
 </head>
 <body>
+
+  <!-- Chatbot -->
   <div class="chat-container">
     <div class="chat-header">💰 Financial Assistant of a Bank</div>
     <div class="chat-box" id="chatBox">
@@ -141,30 +168,31 @@
     </div>
   </div>
 
+  <!-- EMI / Interest Calculator -->
+  <div class="calculator">
+    <h3>📊 EMI / Interest Calculator</h3>
+    <select id="calcType" onchange="toggleCalc()">
+      <option value="emi">💳 EMI Calculator</option>
+      <option value="simple">📈 Simple Interest</option>
+    </select>
+
+    <input type="number" id="principal" placeholder="Principal Amount (₹)">
+    <input type="number" id="rate" placeholder="Rate of Interest (%)">
+    <input type="number" id="time" placeholder="Time Period (months for EMI, years for Interest)">
+
+    <button onclick="calculate()">Calculate</button>
+    <p id="calcResult"></p>
+  </div>
+
   <script>
     const faqResponses = {
       "balance": "Check your balance via app, SMS, or ATM. | आप बैलेंस SMS या एटीएम से चेक कर सकते हैं | शिल्लक ATM किंवा SMS ने तपासा",
       "loan": "We offer various loan options. Visit the branch for more. | हम विभिन्न प्रकार के लोन देते हैं | कर्जासाठी शाखेत भेट द्या",
       "credit card": "Apply online or visit branch. | क्रेडिट कार्ड के लिए ऑनलाइन या शाखा में आवेदन करें | क्रेडिट कार्डसाठी ऑनलाईन अर्ज करा",
-      "emi": "Use our EMI calculator online. | EMI की गणना ऑनलाइन करें | EMI कॅल्क्युलेटर वापरा",
+      "emi": "Use the EMI calculator below to get your monthly installment. | नीचे EMI कैलकुलेटर का उपयोग करें | खाली EMI कॅल्क्युलेटर वापरा",
       "fd": "Start FD with ₹1000. | ₹1000 से FD शुरू करें | ₹1000 पासून FD सुरू करा",
       "upi": "UPI से तुरंत पैसे भेजें | Instantly transfer using UPI | UPI ने त्वरित पैसे पाठवा",
-      "kyc": "Update KYC online or in branch. | KYC ऑनलाइन या शाखा में अपडेट करें | KYC ऑनलाईन किंवा शाखेत अपडेट करा",
-      "net banking": "Register online or in branch. | नेट बैंकिंग के लिए रजिस्टर करें | नेट बँकिंगसाठी नोंदणी करा",
-      "open account": "Open account with PAN and Aadhaar. | पैन और आधार से खाता खोलें | पॅन व आधारने खाते उघडा",
-      "debit card": "Apply for debit card online. | डेबिट कार्ड के लिए ऑनलाइन आवेदन करें | डेबिट कार्डसाठी ऑनलाईन अर्ज करा",
-      "statement": "Download e-statement from net banking. | नेट बैंकिंग से स्टेटमेंट डाउनलोड करें | नेट बँकिंगमधून स्टेटमेंट डाउनलोड करा",
-      "ifsc": "Find IFSC code on our website. | IFSC कोड हमारी वेबसाइट पर देखें | आमच्या वेबसाइटवर IFSC कोड पाहा",
-      "aadhar link": "Link Aadhaar to your bank online. | बैंक में आधार लिंक करें | बँकेत आधार लिंक करा",
-      "pan update": "Submit PAN card copy at branch. | पैन कार्ड शाखा में जमा करें | शाखेत पॅन सादर करा",
-      "mobile update": "Update mobile via net banking. | नेट बैंकिंग से मोबाइल नंबर अपडेट करें | नेट बँकिंगने मोबाईल अपडेट करा",
-      "rd": "Recurring Deposit starts from ₹500. | ₹500 से RD शुरू करें | ₹500 पासून RD सुरू करा",
-      "overdraft": "Overdraft is available with current account. | चालू खाते में ओवरड्राफ्ट सुविधा उपलब्ध है | चालू खात्याला ओवरड्राफ्ट उपलब्ध आहे",
-      "cheque": "Request cheque book online. | चेक बुक ऑनलाइन मांगे | ऑनलाईन चेकबुक मागवा",
-      "mini statement": "Send ‘MINI’ to 9223XXXXXX. | 9223XXXXXX पर 'MINI' भेजें | 'MINI' 9223XXXXXX वर पाठवा",
-      "block card": "Block card via app or call 1800-XXX. | कार्ड को ऐप से ब्लॉक करें | अॅपद्वारे कार्ड ब्लॉक करा",
-      "interest rate": "Interest rates vary. Check latest online. | ब्याज दरें बदलती रहती हैं | व्याजदर ऑनलाईन तपासा",
-      "account close": "Visit branch to close your account. | खाता बंद करने शाखा जाएं | खाते बंद करण्यासाठी शाखा भेट द्या"
+      "kyc": "Update KYC online or in branch. | KYC ऑनलाइन या शाखा में अपडेट करें | KYC ऑनलाईन किंवा शाखेत अपडेट करा"
     };
 
     function sendMessage() {
@@ -198,7 +226,7 @@
         return;
       }
       const recognition = new webkitSpeechRecognition();
-      recognition.lang = 'hi-IN'; // Supports Hindi & Marathi
+      recognition.lang = 'hi-IN';
       recognition.start();
       recognition.onresult = function(event) {
         document.getElementById("userInput").value = event.results[0][0].transcript;
@@ -211,7 +239,35 @@
       for (const key in faqResponses) {
         if (msg.includes(key)) return faqResponses[key];
       }
-      return "Sorry, I didn’t get that. कृपया बँक संबंधित प्रश्न विचारा | Please ask a banking-related question.";
+      return "Sorry, I didn’t get that. कृपया बँक संबंधित प्रश्न विचारा | Please ask a banking-related question contact 8055750397 Email vishuponde@gmail.com.";
+    }
+
+    function toggleCalc() {
+      const type = document.getElementById("calcType").value;
+      const timeInput = document.getElementById("time");
+      timeInput.placeholder = type === "emi" ? "Time Period (in months)" : "Time Period (in years)";
+    }
+
+    function calculate() {
+      const type = document.getElementById("calcType").value;
+      const p = parseFloat(document.getElementById("principal").value);
+      const r = parseFloat(document.getElementById("rate").value);
+      const t = parseFloat(document.getElementById("time").value);
+      const result = document.getElementById("calcResult");
+
+      if (isNaN(p) || isNaN(r) || isNaN(t)) {
+        result.textContent = "❌ Please fill all fields correctly.";
+        return;
+      }
+
+      if (type === "emi") {
+        const monthlyRate = r / 12 / 100;
+        const emi = (p * monthlyRate * Math.pow(1 + monthlyRate, t)) / (Math.pow(1 + monthlyRate, t) - 1);
+        result.textContent = `💳 EMI: ₹${emi.toFixed(2)} per month for ${t} months`;
+      } else {
+        const si = (p * r * t) / 100;
+        result.textContent = `📈 Simple Interest: ₹${si.toFixed(2)} over ${t} years`;
+      }
     }
   </script>
 </body>
